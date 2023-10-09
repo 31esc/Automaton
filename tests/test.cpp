@@ -112,7 +112,7 @@ TEST(Regex_to_DKA, Сorrectness_1) {
 
   std::string str = "ab+*c.ac+*.";  // (a + b)*c(a + c)*
   Automaton automaton(str);
-  automaton.ToDKA();
+  automaton.ToDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -125,7 +125,7 @@ TEST(Regex_to_DKA, Сorrectness_2) {
 
   std::string str = "ab.ba.+*c.ca+*.";  // (ab + ba)*c(c + a)*
   Automaton automaton(str);
-  automaton.ToDKA();
+  automaton.ToDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -138,7 +138,7 @@ TEST(Regex_to_PDKA, Сorrectness_1) {
 
   std::string str = "ab+*c.ac+*.";  // (a + b)*c(a + c)*
   Automaton automaton(str);
-  automaton.ToPDKA();
+  automaton.ToCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -151,7 +151,7 @@ TEST(Regex_to_PDKA, Сorrectness_2) {
 
   std::string str = "ab.ba.+*c.ca+*.";  // (ab + ba)*c(c + a)*
   Automaton automaton(str);
-  automaton.ToPDKA();
+  automaton.ToCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -166,7 +166,7 @@ TEST(PDKA_to_addition_to_PDKA, Сorrectness_1) {
                    std::ifstream::in);  // (a + b)*c(a + c)*
   Automaton automaton;
   in >> automaton;
-  automaton.AdditionToPDKA();
+  automaton.AdditionToCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -181,7 +181,7 @@ TEST(PDKA_to_addition_to_PDKA, Сorrectness_2) {
                    std::ifstream::in);  // (ab + ba)*c(c + a)*
   Automaton automaton;
   in >> automaton;
-  automaton.AdditionToPDKA();
+  automaton.AdditionToCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -194,7 +194,7 @@ TEST(Regex_to_MPDKA, Сorrectness_1) {
 
   std::string str = "ab+*c.ac+*.";  // (a + b)*c(a + c)*
   Automaton automaton(str);
-  automaton.ToMPDKA();
+  automaton.ToMCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -207,7 +207,7 @@ TEST(Regex_to_MPDKA, Сorrectness_2) {
 
   std::string str = "ab.ba.+*c.ca+*.";  // (ab + ba)*c(c + a)*
   Automaton automaton(str);
-  automaton.ToMPDKA();
+  automaton.ToMCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -222,7 +222,7 @@ TEST(PDKA_to_MPDKA, Сorrectness_1) {
                    std::ifstream::in);  // (a + b)*c(a + c)*
   Automaton automaton;
   in >> automaton;
-  automaton.ToMPDKA();
+  automaton.ToMCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -237,7 +237,7 @@ TEST(PDKA_to_MPDKA, Сorrectness_2) {
                    std::ifstream::in);  // (ab + ba)*c(c + a)*
   Automaton automaton;
   in >> automaton;
-  automaton.ToMPDKA();
+  automaton.ToMCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }

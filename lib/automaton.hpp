@@ -36,7 +36,7 @@ class Automaton {
   size_t start_;
   std::string alphabet_;
   size_t vertexes_count_;
-  std::set<size_t> term_vertexes_;
+  std::set<size_t> terminal_vertexes_;
   Edges edges_;
 
   static bool IsEps(const char symbol);
@@ -82,13 +82,13 @@ class Automaton {
 
   void RemoveEpsEdges();
 
-  void ToDKA();
+  void ToDFA();  // Deterministic Finite Automaton
 
-  void ToPDKA();
+  void ToCDFA();  // Complete Deterministic Finite Automaton
 
-  void ToMPDKA();
+  void ToMCDFA();  // Minimal Complete Deterministic Finite Automaton
 
-  void AdditionToPDKA();
+  void AdditionToCDFA();  // Addition to Complete Deterministic Finite Automaton
 
   friend Automaton operator+(const Automaton& first, const Automaton& second);
 

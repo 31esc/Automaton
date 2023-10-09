@@ -2,8 +2,8 @@
 #include "lib/automaton.hpp"
 
 int main() {
-  std::string s = "1ab+*b.+b.ab+*.";  // (1 + (a + b)*b)b(a+b)*
+  std::string s = "ab+*aa.ab+*.b.b.ab.a.+.b*.a.b*.";
   Automaton a(s);
-  a.ToMPDKA();
+  a.ToMCDFA();
   std::cout << a;
 }

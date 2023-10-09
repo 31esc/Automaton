@@ -30,12 +30,12 @@ Automaton::Automaton(const char symbol) {
 
   if (symbol == '1') {
     vertexes_count_ = 1;
-    term_vertexes_ = {0};
+    terminal_vertexes_ = {0};
     edges_.resize(vertexes_count_);
   } else {
     alphabet_ += symbol;
     vertexes_count_ = 2;
-    term_vertexes_ = {1};
+    terminal_vertexes_ = {1};
     edges_.resize(vertexes_count_);
     edges_[0][symbol].push_back(1);
   }
@@ -127,10 +127,10 @@ Automaton operator+(const Automaton& first, const Automaton& second) {
   result.AddEdge(result.start_, first.start_ + first_shift, Automaton::kEps);
   result.AddEdge(result.start_, second.start_ + second_shift, Automaton::kEps);
 
-  result.term_vertexes_ = {result.vertexes_count_ - 1};
-  size_t first_term = *first.term_vertexes_.begin();
-  size_t second_term = *second.term_vertexes_.begin();
-  size_t res_term = *result.term_vertexes_.begin();
+  result.terminal_vertexes_ = {result.vertexes_count_ - 1};
+  size_t first_term = *first.terminal_vertexes_.begin();
+  size_t second_term = *second.terminal_vertexes_.begin();
+  size_t res_term = *result.terminal_vertexes_.begin();
   result.AddEdge(first_term + first_shift, res_term, Automaton::kEps);
   result.AddEdge(second_term + second_shift, res_term, Automaton::kEps);
 
@@ -167,9 +167,9 @@ Automaton operator-(const Automaton& first, const Automaton& second) {
   result.vertexes_count_ = first.GetVertexCount() + second.GetVertexCount();
   result.edges_.resize(result.vertexes_count_);
 
-  size_t first_term = *first.term_vertexes_.begin();
-  size_t second_term = *second.term_vertexes_.begin();
-  result.term_vertexes_ = {second_term + second_shift};
+  size_t first_term = *first.terminal_vertexes_.begin();
+  size_t second_term = *second.terminal_vertexes_.begin();
+  result.terminal_vertexes_ = {second_term + second_shift};
   result.AddEdge(first_term + first_shift, second.start_ + second_shift,
                  Automaton::kEps);
 
@@ -201,11 +201,11 @@ Automaton operator-(const Automaton& first, const Automaton& second) {
 Automaton operator*(const Automaton& first) {
   Automaton result;
   result.start_ = 0;
-  result.term_vertexes_ = {0};
+  result.terminal_vertexes_ = {0};
   result.vertexes_count_ = first.GetVertexCount() + 1;
   result.edges_.resize(result.vertexes_count_);
 
-  size_t first_term = *first.term_vertexes_.begin();
+  size_t first_term = *first.terminal_vertexes_.begin();
   const int first_shift = 1;
   result.AddEdge(result.start_, first.start_ + first_shift, Automaton::kEps);
   result.AddEdge(first_term + first_shift, result.start_, Automaton::kEps);
@@ -241,7 +241,7 @@ std::istream& operator>>(std::istream& in, Automaton& automaton) {
 
   std::string term;
   while (std::getline(in, term) && !term.empty()) {
-    automaton.term_vertexes_.insert(std::stoul(term));
+    automaton.terminal_vertexes_.insert(std::stoul(term));
     if (std::stoul(term) + shift > automaton.edges_.size()) {
       automaton.edges_.resize(std::stoul(term) + shift);
       automaton.vertexes_count_ = std::stoul(term) + shift;
@@ -272,7 +272,7 @@ std::istream& operator>>(std::istream& in, Automaton& automaton) {
 
 std::ostream& operator<<(std::ostream& out, const Automaton& automaton) {
   out << automaton.start_ << "\n\n";
-  for (size_t v : automaton.term_vertexes_) {
+  for (size_t v : automaton.terminal_vertexes_) {
     out << v << '\n';
   }
   out << "\n";
@@ -291,7 +291,7 @@ std::ostream& operator<<(std::ostream& out, const Automaton& automaton) {
 bool operator==(const Automaton& first, const Automaton& second) {
   if (first.start_ != second.start_ || first.alphabet_ != second.alphabet_ ||
       first.vertexes_count_ != second.vertexes_count_ ||
-      first.term_vertexes_ != second.term_vertexes_ ||
+      first.terminal_vertexes_ != second.terminal_vertexes_ ||
       first.edges_ != second.edges_) {
     return false;
   }
@@ -362,13 +362,13 @@ void Automaton::NewTermsAfterCompression(
     set.insert(edge.to);
   }
 
-  for (auto v : term_vertexes_) {
+  for (auto v : terminal_vertexes_) {
     if (set.count(v) == 1) {
       size_t new_number_of_v = GetNewVertexNumber(compressed_list, v);
       new_terms.insert(new_number_of_v);
     }
   }
-  term_vertexes_ = new_terms;
+  terminal_vertexes_ = new_terms;
 }
 
 void Automaton::CompressAndAssignEdges(
@@ -405,7 +405,7 @@ void Automaton::RemoveReachLessVertex() {
 
     bool ok = true;
     for (size_t u = 0; u < vertexes_count_; ++u) {
-      if (term_vertexes_.count(u) && is_reach[v][u]) {
+      if (terminal_vertexes_.count(u) && is_reach[v][u]) {
         ok = true;
       }
     }
@@ -457,8 +457,8 @@ void Automaton::RemoveEpsEdges() {
             }
           }
         }
-        if (term_vertexes_.count(u)) {
-          term_vertexes_.insert(v);
+        if (terminal_vertexes_.count(u)) {
+          terminal_vertexes_.insert(v);
         }
       }
     }
@@ -471,7 +471,7 @@ bool Automaton::GetBit(size_t mask, size_t pos) {
   return mask & (1 << pos);
 }
 
-void Automaton::ToDKA() {
+void Automaton::ToDFA() {
   RemoveEpsEdges();
   std::vector<EdgeHelper> list;
   std::queue<size_t> q;
@@ -489,7 +489,7 @@ void Automaton::ToDKA() {
     }
 
     for (size_t v = 0; v < vertexes_count_; ++v) {
-      if (term_vertexes_.count(v) && GetBit(mask, v)) {
+      if (terminal_vertexes_.count(v) && GetBit(mask, v)) {
         new_terms.insert(mask);
         break;
       }
@@ -513,12 +513,12 @@ void Automaton::ToDKA() {
       q.push(el.second);
     }
   }
-  term_vertexes_ = new_terms;
+  terminal_vertexes_ = new_terms;
   CompressAndAssignEdges(list);
 }
 
-void Automaton::ToPDKA() {
-  ToDKA();
+void Automaton::ToCDFA() {
+  ToDFA();
 
   auto list = GetEdgesList();
   size_t stok = vertexes_count_;
@@ -546,8 +546,8 @@ void Automaton::ToPDKA() {
   CompressAndAssignEdges(list);
 }
 
-void Automaton::AdditionToPDKA() {
-  ToPDKA();
+void Automaton::AdditionToCDFA() {
+  ToCDFA();
   std::set<size_t> set;
   for (size_t from = 0; from < vertexes_count_; ++from) {
     for (auto edge : edges_[from]) {
@@ -559,18 +559,18 @@ void Automaton::AdditionToPDKA() {
     }
   }
 
-  for (size_t term : term_vertexes_) {
+  for (size_t term : terminal_vertexes_) {
     set.erase(term);
   }
 
-  term_vertexes_ = set;
+  terminal_vertexes_ = set;
 }
 
-void Automaton::ToMPDKA() {
-  ToPDKA();
+void Automaton::ToMCDFA() {
+  ToCDFA();
 
   std::vector<size_t> classes(vertexes_count_, 0);
-  for (auto v : term_vertexes_) {
+  for (auto v : terminal_vertexes_) {
     classes[v] = 1;
   }
 
@@ -611,10 +611,10 @@ void Automaton::ToMPDKA() {
   start_ = classes[start_];
 
   std::set<size_t> new_term_vertexes;
-  for (size_t v : term_vertexes_) {
+  for (size_t v : terminal_vertexes_) {
     new_term_vertexes.insert(classes[v]);
   }
-  term_vertexes_ = new_term_vertexes;
+  terminal_vertexes_ = new_term_vertexes;
 
   Edges old_edges = std::move(edges_);
   size_t old_vertexes_count = vertexes_count_;
