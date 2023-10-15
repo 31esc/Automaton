@@ -88,7 +88,13 @@ class Automaton {
 
   void ToMCDFA();  // Minimal Complete Deterministic Finite Automaton
 
-  void AdditionToCDFA();  // Addition to Complete Deterministic Finite Automaton
+  void
+  AdditionToMCDFA();  // Addition to Minimal Complete Deterministic Finite Automaton
+
+  bool IsSuffixByLetterFixLength(char symbol, size_t length);
+
+  static bool IsSuffixByLetterFixLength(std::string str, char symbol,
+                                        size_t length);
 
   friend Automaton operator+(const Automaton& first, const Automaton& second);
 

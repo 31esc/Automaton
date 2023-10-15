@@ -1,4 +1,5 @@
 #include "automaton.hpp"
+#include <cstddef>
 
 bool Automaton::IsEps(const char symbol) {
   return symbol == kEps;
@@ -546,7 +547,7 @@ void Automaton::ToCDFA() {
   CompressAndAssignEdges(list);
 }
 
-void Automaton::AdditionToCDFA() {
+void Automaton::AdditionToMCDFA() {
   ToCDFA();
   std::set<size_t> set;
   for (size_t from = 0; from < vertexes_count_; ++from) {
@@ -637,4 +638,47 @@ void Automaton::ToMCDFA() {
       }
     }
   }
+}
+
+bool Automaton::IsSuffixByLetterFixLength(char symbol, size_t length) {
+  ToMCDFA();
+
+  if (alphabet_.find(symbol) == -1) {
+    return false;
+  }
+
+  std::vector<std::vector<size_t>> dp(vertexes_count_);
+  for (size_t v = 0; v < vertexes_count_; ++v) {
+    dp[v].push_back(edges_[v][symbol][0]);
+  }
+
+  for (size_t i = 2, index = 0; i <= length; i <<= 1, ++index) {
+    for (size_t v = 0; v < vertexes_count_; ++v) {
+      dp[v].push_back(dp[dp[v][index]][index]);
+    }
+  }
+
+  for (size_t v = 0; v < vertexes_count_; ++v) {
+    size_t current_length = length;
+    size_t current_vertex = v;
+    size_t index = 0;
+    while (current_length != 0) {
+      if (current_length & 1) {
+        current_vertex = dp[current_vertex][index];
+      }
+      current_length >>= 1;
+      ++index;
+    }
+    if (terminal_vertexes_.count(current_vertex)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool Automaton::IsSuffixByLetterFixLength(std::string str, char symbol,
+                                          size_t length) {
+  Automaton automaton(str);
+  return automaton.IsSuffixByLetterFixLength(symbol, length);
 }

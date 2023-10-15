@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include "automaton.hpp"
@@ -166,7 +167,7 @@ TEST(PDKA_to_addition_to_PDKA, Сorrectness_1) {
                    std::ifstream::in);  // (a + b)*c(a + c)*
   Automaton automaton;
   in >> automaton;
-  automaton.AdditionToCDFA();
+  automaton.AdditionToMCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -181,7 +182,7 @@ TEST(PDKA_to_addition_to_PDKA, Сorrectness_2) {
                    std::ifstream::in);  // (ab + ba)*c(c + a)*
   Automaton automaton;
   in >> automaton;
-  automaton.AdditionToCDFA();
+  automaton.AdditionToMCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
 }
@@ -240,4 +241,29 @@ TEST(PDKA_to_MPDKA, Сorrectness_2) {
   automaton.ToMCDFA();
 
   EXPECT_TRUE(automaton == correct_automaton);
+}
+
+TEST(IsSuffixByLetterFixLength, Сorrectness) {
+  std::string str = "x";
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'x', 1));
+  EXPECT_FALSE(Automaton::IsSuffixByLetterFixLength(str, 'x', 2));
+
+  str = "a*";
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'a', 5));
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'a', 32));
+  EXPECT_FALSE(Automaton::IsSuffixByLetterFixLength(str, 'b', 1));
+
+  str = "ab+c*.";  // (a + b)c*
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'c', 1));
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'c', 111));
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'a', 1));
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'b', 1));
+  EXPECT_FALSE(Automaton::IsSuffixByLetterFixLength(str, 'a', 2));
+  EXPECT_FALSE(Automaton::IsSuffixByLetterFixLength(str, 'b', 2));
+
+  str = "ab.ba.+*c.ca+*.";  // (ab + ba)*c(c + a)*
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'c', 11));
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'c', 1));
+  EXPECT_TRUE(Automaton::IsSuffixByLetterFixLength(str, 'a', 10));
+  EXPECT_FALSE(Automaton::IsSuffixByLetterFixLength(str, 'b', 1));
 }
